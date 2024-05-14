@@ -17,11 +17,20 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <include/cef_app.h>
+#include "renderprocesshandler.h"
+#include "util.h"
+#include <cstdio>
 #include <glib.h>
+#include <gst/base/gstpushsrc.h>
+#include <gst/gst.h>
+#include <include/cef_app.h>
+#include <include/cef_client.h>
+#include <iostream>
 
-int main(int argc, char * argv[])
-{
+#include <include/cef_app.h>
+#include <include/cef_render_handler.h>
+
+int main(int argc, char *argv[]) {
   CefSettings settings;
 
 #ifdef G_OS_WIN32
@@ -31,5 +40,30 @@ int main(int argc, char * argv[])
   CefMainArgs args(argc, argv);
 #endif
 
-  return CefExecuteProcess(args, nullptr, nullptr);
+  // Create a temporary CommandLine object.
+  CefRefPtr<CefCommandLine> command_line = CreateCommandLine(args);
+
+  for (int i = 0; i < argc; i++) {
+    printf("\nargv[%d]: %s\n", i, argv[i]);
+  }
+
+  if (GetProcessType(command_line) == PROCESS_TYPE_RENDERER) {
+    CefRefPtr<RenderProcessHandler> app(new RenderProcessHandler());
+    return CefExecuteProcess(args, app, nullptr);
+  }
+
+  // Create a CefApp of the correct process type.
+  switch (GetProcessType(command_line)) {
+  case PROCESS_TYPE_BROWSER:
+    // std::cout << "\nBrowser process\n";
+    return CefExecuteProcess(args, nullptr, nullptr);
+    break;
+  case PROCESS_TYPE_RENDERER:
+    // std::cout << "\nRenderer process\n";
+    break;
+  case PROCESS_TYPE_OTHER:
+    // std::cout << "\nOther process\n";
+    return CefExecuteProcess(args, nullptr, nullptr);
+    break;
+  }
 }

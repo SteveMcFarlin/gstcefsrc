@@ -55,10 +55,13 @@ set(GSTCEF_SRCS
   gstcefdemux.cc
   gstcefbin.cc
   gstcefaudiometa.cc
+  browserclient.cc
 )
 
 set(GSTCEFSUBPROCESS_SRCS
   gstcefsubprocess.cc
+  util.cc
+  renderprocesshandler.cc
 )
 
 find_package(PkgConfig)
@@ -95,6 +98,21 @@ set_target_properties("gstcef" PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CEF_TARGET_
 
 COPY_FILES("gstcef" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
 COPY_FILES("gstcef" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "${CEF_TARGET_OUT_DIR}")
+
+# For static linking in case we want to add functions to libcef and use ffi in rust
+#
+# add_library("gstcef-static" STATIC ${GSTCEF_SRCS})
+# SET_LIBRARY_TARGET_PROPERTIES("gstcef-static")
+# add_dependencies("gstcef-static" libcef_dll_wrapper)
+# # target_link_libraries("gstcef-static" libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS} ${GST_LIBRARIES})
+# target_include_directories("gstcef-static" PUBLIC ${GST_INCLUDE_DIRS})
+
+# set_target_properties("gstcef-static" PROPERTIES INSTALL_RPATH "$ORIGIN")
+# set_target_properties("gstcef-static" PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
+# set_target_properties("gstcef-static" PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CEF_TARGET_OUT_DIR})
+
+# COPY_FILES("gstcef-static" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
+# COPY_FILES("gstcef-static" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "${CEF_TARGET_OUT_DIR}")
 
 install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/
